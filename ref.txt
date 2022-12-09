@@ -8,3 +8,6 @@ telegraf --input-filter=cpu --output-filter=postgresql config > telegraf.conf
 docker build -t telegraf_postgres . 
 
 docker run -e INPUT_DATABASE="postgresql://{username}:{password}@{host}:{port}/{database}" -e OUTPUT_DATABASE="postgresql://{username}:{password}@{host}:{port}/{database}" -p 8501:8501 --name metrics_postgres telegraf_postgres:latest
+
+
+
