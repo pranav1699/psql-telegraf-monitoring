@@ -4,31 +4,39 @@ import pandas as pd
 import os
 from streamlit.components.v1 import html
 import plotly.express as px
+from streamlit_autorefresh import st_autorefresh 
+
 st.set_page_config(layout="wide")
 
-connection_string = user = os.getenv('OUTPUT_DATABASE')
-db = create_engine(connection_string)
-conn = db.connect()
+count = st_autorefresh(interval=10000, limit=10000000, key="autorefreshapp")
 
-smtp = "select count(distinct(db)) from postgresql"
-cun = conn.execute(smtp) 
-postgres = pd.DataFrame(cun.fetchall(), columns=cun.keys())
-ct=postgres['count']
-st.metric("Total databases",ct)
+try:
+    connection_string = user = os.getenv('OUTPUT_DATABASE')
+    db = create_engine(connection_string)
+    conn = db.connect()
 
-smtp = "select * from postgresql"
+    smtp = "select count(distinct(db)) from postgresql"
+    cun = conn.execute(smtp) 
+    postgres = pd.DataFrame(cun.fetchall(), columns=cun.keys())
+    ct=postgres['count']
+    st.metric("Total databases",ct)
 
-result = conn.execute(smtp) 
+    smtp = "select * from postgresql"
 
-postgres = pd.DataFrame(result.fetchall(), columns=result.keys())
+    result = conn.execute(smtp) 
 
-st.dataframe(postgres)
+    postgres = pd.DataFrame(result.fetchall(), columns=result.keys())
 
-smtp = '''select time,db,avg(tup_fetched) as tup_fetched from postgresql
-group by "time","db" order by time desc
-'''
-res = conn.execute(smtp) 
+    st.dataframe(postgres)
 
-postgres_ = pd.DataFrame(res.fetchall(), columns=res.keys())
-fig = px.line(postgres_,x='time',y='tup_fetched',color='db')
-st.plotly_chart(fig)
+    smtp = '''select time,db,avg(tup_fetched) as tup_fetched from postgresql
+    group by "time","db" order by time desc
+    '''
+    res = conn.execute(smtp) 
+
+    postgres_ = pd.DataFrame(res.fetchall(), columns=res.keys())
+    fig = px.line(postgres_,x='time',y='tup_fetched',color='db')
+    st.plotly_chart(fig,use_container_width=True,theme="streamlit" )
+except:
+  st.info("Database being Initialized please wait..")
+

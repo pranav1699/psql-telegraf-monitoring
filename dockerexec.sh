@@ -10,5 +10,5 @@ then
         ./telegraf --config telegraf_postgres.conf &
         streamlit run ./app.py
 else
-      echo $INPUT_DATABASE
+      echo "ENTER THE INPUT AND OUTPUT DATABASE.."
 fi
